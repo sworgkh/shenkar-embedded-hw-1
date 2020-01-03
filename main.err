@@ -1,0 +1,11 @@
+Warning[2066] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 386 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 387 : suspicious pointer conversion
+Warning[2066] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 389 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 390 : suspicious pointer conversion
+Warning[2066] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 392 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : suspicious pointer conversion
+Warning[2065] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : static function 'YourLowPriorityISRCode' never referenced
+Warning[2065] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : static function 'YourHighPriorityISRCode' never referenced
+Warning[2065] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : static function 'YourLowPriorityISRCode' never referenced
+Warning[2065] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : static function 'YourHighPriorityISRCode' never referenced
+Warning[2064] C:\Users\js\Desktop\Projects\embedded\workspace\Shenkar\Lab4 - Clion\main.c 393 : static function 'ProcessIO' not defined
