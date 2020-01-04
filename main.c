@@ -57,6 +57,10 @@
 #include "oled.h"
 
 #include "soft_start.h"
+#include "math.h"
+
+#include "potentiometer.h"
+#include "icons.h"
 
 //	========================	CONFIGURATION	========================
 
@@ -115,6 +119,7 @@
 //	========================	Global VARIABLES	========================
 #pragma udata
 //You can define Global Data Elements here
+unsigned int p_value;
 
 //	========================	PRIVATE PROTOTYPES	========================
 static void InitializeSystem(void);
@@ -247,20 +252,21 @@ void YourLowPriorityISRCode()
  * Note:            
  *
  *****************************************************************************/
-void UserInit(void) {
+void UserInit(void)
+{
 
-    /* Initialize the mTouch library */
-    mTouchInit();
+  /* Initialize the mTouch library */
+  mTouchInit();
 
-    /* Call the mTouch callibration function */
-    mTouchCalibrate();
+  /* Call the mTouch callibration function */
+  mTouchCalibrate();
 
-    /* Initialize the accelerometer */
-    InitBma150();
+  /* Initialize the accelerometer */
+  InitBma150();
 
-    /* Initialize the oLED Display */
-    ResetDevice();
-    FillDisplay(0x00);
+  /* Initialize the oLED Display */
+  ResetDevice();
+  FillDisplay(0x00);
 } //end UserInit
 
 /********************************************************************
@@ -283,58 +289,70 @@ void UserInit(void) {
  *
  * Note:            None
  *******************************************************************/
-static void InitializeSystem(void) {
-    // Soft Start the APP_VDD
-    while (!AppPowerReady());
+static void InitializeSystem(void)
+{
+  // Soft Start the APP_VDD
+  while (!AppPowerReady())
+    ;
 
 #if defined(PIC18F46J50_PIM)
-    //Configure all I/O pins to use digital input buffers
-    ANCON0 = 0xFF; // Default all pins to digital
-    ANCON1 = 0xFF; // Default all pins to digital
+  //Configure all I/O pins to use digital input buffers
+  ANCON0 = 0xFF; // Default all pins to digital
+  ANCON1 = 0xFF; // Default all pins to digital
 #endif
 
-    UserInit();
+  UserInit();
 
 } //end InitializeSystem
 
 //	========================	Application Code	========================
 
-BOOL CheckButtonPressed(void) {
-    static char buttonPressed = FALSE;
-    static unsigned long buttonPressCounter = 0;
+BOOL CheckButtonPressed(void)
+{
+  static char buttonPressed = FALSE;
+  static unsigned long buttonPressCounter = 0;
 
-    if (PORTBbits.RB0 == 0) {
-        if (buttonPressCounter++ > 7000) {
-            buttonPressCounter = 0;
-            buttonPressed = TRUE;
-        }
-    } else {
-        if (buttonPressed == TRUE) {
-            if (buttonPressCounter == 0) {
-                buttonPressed = FALSE;
-                return TRUE;
-            } else {
-                buttonPressCounter--;
-            }
-        }
+  if (PORTBbits.RB0 == 0)
+  {
+    if (buttonPressCounter++ > 7000)
+    {
+      buttonPressCounter = 0;
+      buttonPressed = TRUE;
     }
+  }
+  else
+  {
+    if (buttonPressed == TRUE)
+    {
+      if (buttonPressCounter == 0)
+      {
+        buttonPressed = FALSE;
+        return TRUE;
+      }
+      else
+      {
+        buttonPressCounter--;
+      }
+    }
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
 #define AC_X 2
 #define AC_Y 4
 #define AC_Z 6
 
-int read_accel_axis(BYTE axis) {
-    BYTE value = 0;
-    int result = 0;
-    value = BMA150_ReadByte(axis + 1);
-    result = value << 2;
-    value = BMA150_ReadByte(axis);
-    value = value >> 6;
-    result = result | value;
-    return result;
+int read_accel_axis(BYTE axis)
+{
+  BYTE value = 0;
+  int result = 0;
+  value = BMA150_ReadByte(axis + 1);
+  result = value << 2;
+  value = BMA150_ReadByte(axis);
+  value = value >> 6;
+  result = result | value;
+  return result;
 }
 
 /********************************************************************
@@ -352,47 +370,149 @@ int read_accel_axis(BYTE axis) {
  *
  * Note:            None
  *******************************************************************/
-void main(void) {
-    BYTE value;
-    unsigned int x = 0,
-            x_max = 0,
-            x_min = 0,
-            y = 0,
-            y_max = 0,
-            y_min = 0,
-            z = 0,
-            z_max = 0,
-            z_min = 0;
-    char str[32] = {0};
+#define THRESHOLD 16
 
-    // All Variables Should be declared before
+void handle_potentiometer(void)
+{
+  int count, offset = 0;
+  unsigned int new_p_value, slice;
+  char cprint[4];
 
-    InitializeSystem();
-    while (1) //Main is Usually an Endless Loop
+  new_p_value = get_potentiometer_value();
+
+  if (abs(p_value - new_p_value) >= THRESHOLD || new_p_value == 1023 || new_p_value == 0)
+    p_value = new_p_value;
+
+  sprintf(cprint, "%4d", p_value);
+  oledPutString(cprint, 0, 0);
+  offset = 6 * 4 + 10;
+  oledPutCol(0x1C, 0, offset++);
+
+  slice = p_value / 16;
+
+  for (count = 0; count < 64; count++)
+  {
+    if (count == slice)
+      oledPutCol(0xFF, 0, offset + count);
+    else
     {
-        x = read_accel_axis(AC_X);
-        y = read_accel_axis(AC_Y);
-        z = read_accel_axis(AC_Z);
-
-        if (x_max < x) x_max = x;
-        else if (x_min > x) x_min = x;
-
-        if (y_max < y) y_max = y;
-        else if (y_min > y) y_min = y;
-
-        if (z_max < z) z_max = z;
-        else if (z_min > z) z_min = z;
-
-        sprintf(str, "X:%04d,Y:%04d, Z:%04d", x, y, z);
-        oledPutString(str, 1, 1);
-
-        sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_max, y_max, z_max);
-        oledPutString(str, 3, 1);
-
-        sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_min, y_min, z_min);
-        oledPutString(str, 5, 1);
-
+      if (count % 8 == 0 && count > 7)
+        oledPutCol(0x38, 0, offset + count);
+      else
+        oledPutCol(0x08, 0, offset + count);
     }
+  }
+
+  offset += 64;
+  oledPutCol(0x1C, 0, offset);
+}
+
+void handle_main_button(void)
+{
+  int pos = 119, i = 0;
+  
+  if (PORTBbits.RB0 == 0)
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(icon1[i], 0, pos++);
+  }
+  else
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(icon2[i], 0, pos++);
+  }
+}
+
+#define LEFT_BUTTON 3
+#define RIGHT_BUTTON 0
+void handle_left_button(void)
+{
+  int left_value, right_value, i;
+ 
+  char cprint[17];
+
+  left_value = mTouchReadButton(LEFT_BUTTON);
+  right_value = mTouchReadButton(RIGHT_BUTTON);
+
+  sprintf(cprint, "L: %4d | R: %4d", left_value, right_value);
+  oledPutString(cprint, 4, 0);
+
+  if (left_value < 800)
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(left_arrow_icon[i], 2, i);
+  }
+  else
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(0x00, 2, i);
+  }
+
+  if (right_value < 800)
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(right_arrow_icon[i], 2, 8 + i);
+  }
+  else
+  {
+    for (i = 0; i < 8; i++)
+      oledPutCol(0x00, 2, 8 + i);
+  }
+}
+
+void main(void)
+{
+  // BYTE value;
+  // unsigned int x = 0,
+  //              x_max = 0,
+  //              x_min = 0,
+  //              y = 0,
+  //              y_max = 0,
+  //              y_min = 0,
+  //              z = 0,
+  //              z_max = 0,
+  //              z_min = 0,
+  //              toll = 2;
+  // char str[32] = {0};
+
+  // All Variables Should be declared before
+
+  InitializeSystem();
+
+  while (1) //Main is Usually an Endless Loop
+  {
+
+    handle_potentiometer();
+    handle_main_button();
+    handle_left_button();
+    // x = read_accel_axis(AC_X);
+    // y = read_accel_axis(AC_Y);
+    // z = read_accel_axis(AC_Z);
+
+    // if (x_max - x > toll)
+    //   x_max = x;
+    // else if (x_min - x < toll)
+    //   x_min = x;
+
+    // if (y_max < y)
+    //   y_max = y;
+    // else if (y_min > y)
+    //   y_min = y;
+
+    // if (z_max < z)
+    //   z_max = z;
+    // else if (z_min > z)
+    //   z_min = z;
+
+    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x, y, z);
+    // oledPutString(str, 1, 1);
+
+    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_max, y_max, z_max);
+    // oledPutString(str, 3, 1);
+
+    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_min, y_min, z_min);
+    // oledPutString(str, 5, 1);
+  }
 } //end main
 
 /** EOF main.c *************************************************/
