@@ -46,6 +46,7 @@
 #include "VisualSpecials.h"
 #endif // VISUAL
 
+#include "math.h"
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "HardwareProfile.h"
@@ -57,10 +58,8 @@
 #include "oled.h"
 
 #include "soft_start.h"
-#include "math.h"
 
 #include "potentiometer.h"
-#include "icons.h"
 
 //	========================	CONFIGURATION	========================
 
@@ -120,6 +119,11 @@
 #pragma udata
 //You can define Global Data Elements here
 unsigned int p_value;
+unsigned char icon1[8] = {0xE7, 0x99, 0xA5, 0x5A, 0x5A, 0xA5, 0x99, 0xE7};
+unsigned char icon2[8] = {0x18, 0x66, 0x5A, 0xA5, 0xA5, 0x5A, 0x66, 0x18};
+unsigned char left_arrow_icon[8] = {0x18, 0x3C, 0x7E, 0xFF, 0x18, 0x18, 0x18, 0x3C};
+unsigned char right_arrow_icon[8] = {0x3C, 0x18, 0x18, 0x18, 0xFF, 0x7E, 0x3C, 0x18};
+int x_max = 0, y_max = 0, x_min = 0, y_min = 0;
 
 //	========================	PRIVATE PROTOTYPES	========================
 static void InitializeSystem(void);
@@ -343,15 +347,32 @@ BOOL CheckButtonPressed(void)
 #define AC_Y 4
 #define AC_Z 6
 
+int comp_2(int value)
+{
+  value = ~value;
+  value += 1;
+  return -value;
+}
+
 int read_accel_axis(BYTE axis)
 {
-  BYTE value = 0;
+  BYTE msb = 0, lsb = 0;
   int result = 0;
-  value = BMA150_ReadByte(axis + 1);
-  result = value << 2;
-  value = BMA150_ReadByte(axis);
-  value = value >> 6;
-  result = result | value;
+
+  lsb = BMA150_ReadByte(axis);
+  msb = BMA150_ReadByte(axis + 1);
+
+  result = (int)msb;
+  result = result << 8;
+  result += lsb;
+  result = result >> 6;
+
+  if (result > 511)
+  {
+    result = result | 0xFC00;
+    result = comp_2(result);
+  }
+
   return result;
 }
 
@@ -410,7 +431,7 @@ void handle_potentiometer(void)
 void handle_main_button(void)
 {
   int pos = 119, i = 0;
-  
+
   if (PORTBbits.RB0 == 0)
   {
     for (i = 0; i < 8; i++)
@@ -428,14 +449,9 @@ void handle_main_button(void)
 void handle_left_button(void)
 {
   int left_value, right_value, i;
- 
-  char cprint[17];
 
   left_value = mTouchReadButton(LEFT_BUTTON);
   right_value = mTouchReadButton(RIGHT_BUTTON);
-
-  sprintf(cprint, "L: %4d | R: %4d", left_value, right_value);
-  oledPutString(cprint, 4, 0);
 
   if (left_value < 800)
   {
@@ -459,21 +475,68 @@ void handle_left_button(void)
       oledPutCol(0x00, 2, 8 + i);
   }
 }
+void handle_accelerometer(void)
+{
+  int x = 0, y = 0, i = 0, pos = 0;
+  char str[6];
+
+  x = read_accel_axis(AC_X);
+
+  if (x_max < x)
+    x_max = x;
+
+  if (x_min > x)
+    x_min = x;
+
+  y = read_accel_axis(AC_Y);
+
+  if (y_max < y)
+    y_max = y;
+
+  if (y_min > y)
+    y_min = y;
+
+  sprintf(str, "X: %3d", x);
+  oledPutString(str, 4, 0);
+
+  pos = 6 * 7;
+  oledPutCol(0x1C, 4, pos++);
+
+  for (i = 0; i < 70; i++)
+  {
+    if (i == x_max)
+      oledPutCol(0xF0, 4, pos);
+    else if (i == x_min)
+      oledPutCol(0x0F, 4, pos);
+    else
+      oledPutCol(0x08, 4, pos);
+    pos++;
+  }
+
+  oledPutCol(0x18, 4, pos);
+
+  sprintf(str, "Y: %3d", y);
+  oledPutString(str, 6, 0);
+
+  pos = 6 * 7;
+  oledPutCol(0x1C, 6, pos++);
+
+  for (i = 0; i < 70; i++)
+  {
+    if (i == y_max)
+      oledPutCol(0xF0, 6, pos);
+    else if (i == y_min)
+      oledPutCol(0x0F, 6, pos);
+    else
+      oledPutCol(0x08, 6, pos);
+    pos++;
+  }
+
+  oledPutCol(0x18, 6, pos);
+}
 
 void main(void)
 {
-  // BYTE value;
-  // unsigned int x = 0,
-  //              x_max = 0,
-  //              x_min = 0,
-  //              y = 0,
-  //              y_max = 0,
-  //              y_min = 0,
-  //              z = 0,
-  //              z_max = 0,
-  //              z_min = 0,
-  //              toll = 2;
-  // char str[32] = {0};
 
   // All Variables Should be declared before
 
@@ -485,33 +548,7 @@ void main(void)
     handle_potentiometer();
     handle_main_button();
     handle_left_button();
-    // x = read_accel_axis(AC_X);
-    // y = read_accel_axis(AC_Y);
-    // z = read_accel_axis(AC_Z);
-
-    // if (x_max - x > toll)
-    //   x_max = x;
-    // else if (x_min - x < toll)
-    //   x_min = x;
-
-    // if (y_max < y)
-    //   y_max = y;
-    // else if (y_min > y)
-    //   y_min = y;
-
-    // if (z_max < z)
-    //   z_max = z;
-    // else if (z_min > z)
-    //   z_min = z;
-
-    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x, y, z);
-    // oledPutString(str, 1, 1);
-
-    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_max, y_max, z_max);
-    // oledPutString(str, 3, 1);
-
-    // sprintf(str, "X:%04d,Y:%04d, Z:%04d", x_min, y_min, z_min);
-    // oledPutString(str, 5, 1);
+    handle_accelerometer();
   }
 } //end main
 

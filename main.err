@@ -1,10 +1,12 @@
-Warning[2058] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 380 : call of function without prototype
-Warning[2066] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 385 : type qualifier mismatch in assignment
-Warning[2054] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 386 : suspicious pointer conversion
-Warning[2066] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 439 : type qualifier mismatch in assignment
-Warning[2054] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 440 : suspicious pointer conversion
-Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 489 : static function 'YourLowPriorityISRCode' never referenced
-Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 489 : static function 'YourHighPriorityISRCode' never referenced
-Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 489 : static function 'YourLowPriorityISRCode' never referenced
-Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 489 : static function 'YourHighPriorityISRCode' never referenced
-Warning[2064] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 489 : static function 'ProcessIO' not defined
+Warning[2058] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 402 : call of function without prototype
+Warning[2066] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 407 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 408 : suspicious pointer conversion
+Warning[2066] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 499 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 500 : suspicious pointer conversion
+Warning[2066] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 518 : type qualifier mismatch in assignment
+Warning[2054] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 519 : suspicious pointer conversion
+Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 551 : static function 'YourLowPriorityISRCode' never referenced
+Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 551 : static function 'YourHighPriorityISRCode' never referenced
+Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 551 : static function 'YourLowPriorityISRCode' never referenced
+Warning[2065] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 551 : static function 'YourHighPriorityISRCode' never referenced
+Warning[2064] C:\Users\Nichka\Desktop\Sworgkh\embeded\Shenkar\shenkar-embedded-hw-1\main.c 551 : static function 'ProcessIO' not defined
